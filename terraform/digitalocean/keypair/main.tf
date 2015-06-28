@@ -1,6 +1,6 @@
 # input variables
 variable short_name { default = "mi" }
-variable public_key_filename { default = "~/.ssh/id_rsa.pub" }
+variable public_key_filename { default = "~/.ssh/id_rsa_${var.short_name}.pub" }
 
 # create resources
 resource "digitalocean_ssh_key" "default" {
