@@ -11,6 +11,7 @@ module "dc2-hosts" {
 	source = "./terraform/openstack/hosts"
 	auth_url = ""
 	datacenter = "dc2"
+	domain = "example.com"
 	tenant_id = ""
 	tenant_name = ""
 	control_flavor_name = ""
@@ -19,6 +20,6 @@ module "dc2-hosts" {
 	image_name = ""
 	keypair_name = "${ module.dc2-keypair.keypair_name }"
 	control_count = 2
-	resource_count = 3
+	worker_count = 3
 	security_groups = ""
 }

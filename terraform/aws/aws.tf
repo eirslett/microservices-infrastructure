@@ -9,6 +9,7 @@ variable "availability_zone" {}
 variable "datacenter" {default = "aws"}
 variable "long_name" {default = "microservices-infastructure"}
 variable "short_name" {default = "mi"}
+variable "domain" {default = "example.com"}
 variable "ssh_username"  {default = "centos"}
 variable "ssh_key" {default = "~/.ssh/id_rsa.pub"}
 
@@ -69,7 +70,7 @@ resource "aws_instance" "mi-control-nodes" {
   subnet_id = "${aws_subnet.main.id}"
 
   tags {
-    Name = "${var.short_name}-control-${format("%02d", count.index+1)}"
+    Name = "control-${count.index}.${var.short_name}.${var.domain}"
     sshUser = "${var.ssh_username}"
     role = "control"
     dc = "${var.datacenter}"
@@ -93,7 +94,7 @@ resource "aws_instance" "mi-worker-nodes" {
   subnet_id = "${aws_subnet.main.id}"
 
   tags {
-    Name = "${var.short_name}-worker-${format("%03d", count.index+1)}"
+    Name = "worker-${count.index}.${var.short_name}.${var.domain}"
     sshUser = "${var.ssh_username}"
     role = "worker"
     dc = "${var.datacenter}"

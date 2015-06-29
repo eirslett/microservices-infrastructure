@@ -8,10 +8,11 @@ variable net_id { }
 variable keypair_name { }
 variable image_name { }
 variable control_count {}
-variable resource_count {}
+variable worker_count {}
 variable security_groups { default = "default" }
 variable short_name { default = "mi" }
 variable long_name { default = "microservices-infrastructure" }
+variable domain { default = "example.com" }
 variable ssh_user { default = "centos" }
 
 provider "openstack" {
@@ -21,7 +22,7 @@ provider "openstack" {
 }
 
 resource "openstack_compute_instance_v2" "control" {
-  name = "${ var.short_name}-control-${format("%02d", count.index+1) }"
+  name = "control-${count.index}.${var.short_name}.${var.domain}"
   key_pair = "${ var.keypair_name }"
   image_name = "${ var.image_name }"
   flavor_name = "${ var.control_flavor_name }"
@@ -35,8 +36,8 @@ resource "openstack_compute_instance_v2" "control" {
   count = "${ var.control_count }"
 }
 
-resource "openstack_compute_instance_v2" "resource" {
-  name = "${ var.short_name}-worker-${format("%02d", count.index+1) }"
+resource "openstack_compute_instance_v2" "worker" {
+  name = "worker-${count.index}.${var.short_name}.${var.domain}"
   key_pair = "${ var.keypair_name }"
   image_name = "${ var.image_name }"
   flavor_name = "${ var.resource_flavor_name }"

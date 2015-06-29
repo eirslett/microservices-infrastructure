@@ -8,6 +8,7 @@ variable "consul_dc" {}
 
 variable "short_name" {default = "mi"}
 variable "long_name" {default = "microservices-infrastructure"}
+variable "domain" {default = "example.com"}
 
 variable "control_count" {default = 3}
 variable "worker_count" {default = 2}
@@ -17,7 +18,7 @@ variable "control_ram" { default = 4096 }
 variable "worker_ram" { default = 4096 }
 
 resource "vsphere_virtual_machine" "mi-control-nodes" {
-  name = "${var.short_name}-control-${format("%02d", count.index+1)}"
+  name = "control-${count.index}.${var.short_name}.${var.domain}"
   image = "${var.template}"
 
   datacenter = "${var.datacenter}"
@@ -47,7 +48,7 @@ resource "vsphere_virtual_machine" "mi-control-nodes" {
 }
 
 resource "vsphere_virtual_machine" "mi-worker-nodes" {
-  name = "${var.short_name}-worker-${format("%02d", count.index+1)}"
+  name = "worker-${count.index}.${var.short_name}.${var.domain}"
   image = "${var.template}"
 
   datacenter = "${var.datacenter}"

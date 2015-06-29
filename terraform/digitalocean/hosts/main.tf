@@ -5,6 +5,7 @@ variable datacenter { default = "mi" }
 variable image_name { default = "centos-7-0-x64" }
 variable region_name { default = "nyc3" }
 variable short_name { default = "mi" }
+variable domain { default = "example.com" }
 variable ssh_key { }
 variable worker_count { default = 3 }
 variable worker_size { default = "4gb" }
@@ -12,7 +13,7 @@ variable worker_size { default = "4gb" }
 # create resources
 resource "digitalocean_droplet" "control" {
   count = "${var.control_count}"
-  name = "${var.short_name}-control-${format("%02d", count.index+1)}"
+  name = "control-${count.index}.${var.short_name}.${var.domain}"
   image = "${var.image_name}"
   region = "${var.region_name}"
   size = "${var.control_size}"
@@ -22,7 +23,7 @@ resource "digitalocean_droplet" "control" {
 
 resource "digitalocean_droplet" "worker" {
   count = "${var.worker_count}"
-  name = "${var.short_name}-worker-${format("%03d", count.index+1)}"
+  name = "worker-${count.index}.${var.short_name}.${var.domain}"
   image = "${var.image_name}"
   region = "${var.region_name}"
   size = "${var.worker_size}"

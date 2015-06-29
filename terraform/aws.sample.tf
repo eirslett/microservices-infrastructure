@@ -7,6 +7,7 @@ provider "aws" {
 module "aws-dc" {
   source = "./terraform/aws"
   availability_zone = "us-east-1e"
+  domain = "example.com"
   control_type = "t2.small"
   worker_type = "t2.small"
   ssh_username = "centos"

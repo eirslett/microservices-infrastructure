@@ -12,6 +12,7 @@ module "gce-dc" {
   network_ipv4 = "10.0.0.0/16"
   long_name = "microservices-infrastructure"
   short_name = "mi"
+  domain = "example.com"
   region = ""
   control_count = 2
   worker_count = 3

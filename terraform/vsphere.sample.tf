@@ -9,6 +9,7 @@ module "vsphere-dc" {
   source = "./terraform/vsphere"
   long_name = ""
   short_name = ""
+  domain = "example.com"
   datacenter = ""
   host = ""
   pool = ""

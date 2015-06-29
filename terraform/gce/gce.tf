@@ -5,6 +5,7 @@ variable "long_name" {default = "microservices-infastructure"}
 variable "network_ipv4" {default = "10.0.0.0/16"}
 variable "region" {default = "us-central1-a"}
 variable "short_name" {default = "mi"}
+variable "domain" {default = "example.com"}
 variable "ssh_key" {default = "~/.ssh/id_rsa.pub"}
 variable "ssh_user" {default = "centos"}
 variable "worker_count" {default = 1}
@@ -58,8 +59,8 @@ resource "google_compute_firewall" "mi-firewall-internal" {
 
 # Instances
 resource "google_compute_instance" "mi-control-nodes" {
-  name = "${var.short_name}-control-${format("%02d", count.index+1)}"
-  description = "${var.long_name} control node #${format("%02d", count.index+1)}"
+  name = "control-${count.index}.${var.short_name}.${var.domain}"
+  description = "${var.long_name} control node #${count.index}"
   machine_type = "${var.control_type}"
   zone = "${var.region}"
   can_ip_forward = false
@@ -86,8 +87,8 @@ resource "google_compute_instance" "mi-control-nodes" {
 }
 
 resource "google_compute_instance" "mi-worker-nodes" {
-  name = "${var.short_name}-worker-${format("%03d", count.index+1)}"
-  description = "${var.long_name} worker node #${format("%03d", count.index+1)}"
+  name = "worker-${count.index}.${var.short_name}.${var.domain}"
+  description = "${var.long_name} worker node #${count.index}"
   machine_type = "${var.worker_type}"
   zone = "${var.region}"
   can_ip_forward = false
