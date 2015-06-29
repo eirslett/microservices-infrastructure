@@ -1,0 +1,11 @@
+#!/bin/bash
+iptables -F CLUSTER
+iptables -D INPUT -j CLUSTER
+iptables -X CLUSTER
+iptables -N CLUSTER
+
+{% raw %}
+{{range nodes}}
+iptables -A CLUSTER -d {{.Address}} -j ACCEPT{{end}}
+{% endraw %}
+iptables -A INPUT -j CLUSTER
