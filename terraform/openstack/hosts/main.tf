@@ -48,6 +48,6 @@ resource "openstack_compute_instance_v2" "worker" {
     role = "worker"
     ssh_user = "${ var.ssh_user }"
    }
-  count = "${ var.resource_count }"
+  count = "${ var.worker_count }"
 }
 
