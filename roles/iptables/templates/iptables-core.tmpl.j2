@@ -4,8 +4,39 @@ iptables -D INPUT -j CLUSTER
 iptables -X CLUSTER
 iptables -N CLUSTER
 
-{% raw %}
+
+{% raw }
+# Allow all connection within the cluster
 {{range nodes}}
-iptables -A CLUSTER -d {{.Address}} -j ACCEPT{{end}}
-{% endraw %}
+iptables -A CLUSTER -s {{.Address}} -j ACCEPT{{end}}
 iptables -A INPUT -j CLUSTER
+{% endraw %}
+
+iptables -F COMMON
+iptables -D INPUT -j COMMON
+iptables -X COMMON
+iptables -N COMMON
+
+# Allow from docker0
+iptables -A COMMON -i docker0 -j ACCEPT
+
+# Allow SSH from all IPs
+iptables -A COMMON -p tcp --dport 22 -j ACCEPT
+
+# Allow loopback
+iptables -I COMMON 1 -i lo -j ACCEPT
+
+# Allow traffic from within the FINN network
+{% for allow_ip in iptables_allow_ips %}
+iptables -A COMMON -s {{ allow_ip }} -j ACCEPT
+{% endfor %}
+
+# Allow traffic from the bootstrap node
+iptables -A COMMON -s 178.62.179.117 -j ACCEPT
+iptables -A COMMON -s 10.129.115.134 -j ACCEPT
+
+# Deny all others (just log for now)
+iptables -A COMMON -j LOG
+iptables -A COMMON -j DROP
+
+iptables -A INPUT -j COMMON
