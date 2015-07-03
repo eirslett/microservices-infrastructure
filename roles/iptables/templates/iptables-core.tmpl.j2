@@ -5,7 +5,7 @@ iptables -X CLUSTER
 iptables -N CLUSTER
 
 
-{% raw }
+{% raw %}
 # Allow all connection within the cluster
 {{range nodes}}
 iptables -A CLUSTER -s {{.Address}} -j ACCEPT{{end}}
