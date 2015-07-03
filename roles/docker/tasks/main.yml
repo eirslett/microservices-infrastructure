@@ -27,6 +27,18 @@
     - docker
     - bootstrap
 
+- name: configure docker daemon
+  sudo: yes
+  lineinfile:
+    dest: /etc/sysconfig/docker
+    regexp: ^OPTIONS
+    line: OPTIONS='--selinux-enabled --iptables=false'
+    state: present
+  notify:
+    - restart docker
+  tags:
+    - docker
+
 - name: configure docker consul dns
   sudo: yes
   lineinfile:
