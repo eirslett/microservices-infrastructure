@@ -20,6 +20,9 @@ iptables -N COMMON
 # Allow from docker0
 iptables -A COMMON -i docker0 -j ACCEPT
 
+# Allow stateful connections
+iptables -A COMMON -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+
 # Allow SSH from all IPs
 iptables -A COMMON -p tcp --dport 22 -j ACCEPT
 
