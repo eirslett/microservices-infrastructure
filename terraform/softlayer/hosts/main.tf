@@ -3,7 +3,7 @@ variable control_count { default = 1 }
 variable control_size { default = 4096 }
 variable datacenter { default = "mi" }
 variable domain { default = "example.com" }
-variable image_name { default = "CENTOS_LATEST" }
+variable image_name { default = "CENTOS_7_64" }
 variable region_name { default = "ams01" }
 variable short_name { default = "mi" }
 variable ssh_key { }
@@ -20,6 +20,7 @@ resource "softlayer_virtualserver" "control" {
   ram = "${var.control_size}"
   cpu = 1
   ssh_keys = ["${var.ssh_key}"]
+  user_data = "{\"role\":\"control\",\"dc\":\"${var.datacenter}\"}"
 }
 
 resource "softlayer_virtualserver" "worker" {
@@ -31,4 +32,5 @@ resource "softlayer_virtualserver" "worker" {
   ram = "${var.worker_size}"
   cpu = 1
   ssh_keys = ["${var.ssh_key}"]
+  user_data = "{\"role\":\"worker\",\"dc\":\"${var.datacenter}\"}"
 }
