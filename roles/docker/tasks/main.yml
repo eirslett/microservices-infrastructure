@@ -39,16 +39,18 @@
 
 - name: create docker config override file for systemd
   sudo: yes
-  template:
-    src: docker.conf.j2
+  file:
+    src: docker.conf
     dest: /etc/systemd/system/docker.service.d/docker.conf
   tags:
     - docker
     - bootstrap
 
-- name: reload systemctl config
+- name: create docker daemon config file
   sudo: yes
-  command: systemctl daemon-reload
+  template':
+    src: docker.j2
+    dest: /etc/sysconfig/docker
   tags:
     - docker
     - bootstrap
@@ -62,6 +64,13 @@
     state: present
   notify:
     - restart docker
+  tags:
+    - docker
+    - bootstrap
+
+- name: reload systemctl config
+  sudo: yes
+  command: systemctl daemon-reload
   tags:
     - docker
     - bootstrap
