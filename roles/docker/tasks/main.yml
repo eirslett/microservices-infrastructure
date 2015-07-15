@@ -39,7 +39,7 @@
 
 - name: create docker config override file for systemd
   sudo: yes
-  file:
+  copy:
     src: docker.conf
     dest: /etc/systemd/system/docker.service.d/docker.conf
   tags:
