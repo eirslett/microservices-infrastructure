@@ -1,5 +1,5 @@
 ---
-# Workaround for https://github.com/CiscoCloud/microservices-infrastructure/issues/161 
+# Workaround for https://github.com/CiscoCloud/microservices-infrastructure/issues/161
 - name: install latest device-mapper-libs
   sudo: yes
   yum:
@@ -9,26 +9,62 @@
     - docker
     - bootstrap
 
-- name: install docker
+- name: download docker package
+  sudo: yes
+  get_url:
+    url: https://get.docker.com/rpm/1.7.0/centos-7/RPMS/x86_64/docker-engine-1.7.0-1.el7.centos.x86_64.rpm
+
+    dest: /tmp/docker-engine-1.7.0-1.el7.centos.x86_64.rpm
+  tags:
+    - docker
+    - bootstrap
+
+- name: install docker from local package
   sudo: yes
   yum:
-    name: docker
+    name: /tmp/docker-engine-1.7.0-1.el7.centos.x86_64.rpm
     state: present
   tags:
     - docker
     - bootstrap
 
-- name: configure docker consul dns
+- name: create directory for docker override file
+  sudo: yes
+  file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+  tags:
+    - docker
+    - bootstrap
+
+- name: create docker config override file for systemd
+  sudo: yes
+  template:
+    src: docker.conf.j2
+    dest: /etc/systemd/system/docker.service.d/docker.conf
+  tags:
+    - docker
+    - bootstrap
+
+- name: reload systemctl config
+  sudo: yes
+  command: systemctl daemon-reload
+  tags:
+    - docker
+    - bootstrap
+
+- name: override docker ExecStart
   sudo: yes
   lineinfile:
-    dest: /etc/sysconfig/docker-network
-    regexp: ^DOCKER_NETWORK_OPTIONS
-    line: DOCKER_NETWORK_OPTIONS='--dns {{ ansible_default_ipv4.address }} --dns-search service.{{ consul_dns_domain }}'
+    dest: /usr/lib/systemd/system/docker.service
+    regexp: ^ExecStart
+    line: ExecStart=/usr/bin/docker -d -H fd:// $OPTIONS
     state: present
   notify:
     - restart docker
   tags:
     - docker
+    - bootstrap
 
 - name: enable docker
   sudo: yes
@@ -40,4 +76,4 @@
     - docker
     - bootstrap # needed to install Docker images during bootstrap
 
-- include: collectd.yml 
+- include: collectd.yml
