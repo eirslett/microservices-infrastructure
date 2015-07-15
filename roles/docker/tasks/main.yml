@@ -48,7 +48,7 @@
 
 - name: create docker daemon config file
   sudo: yes
-  template':
+  template:
     src: docker.j2
     dest: /etc/sysconfig/docker
   tags:
