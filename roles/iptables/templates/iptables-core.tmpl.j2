@@ -1,0 +1,70 @@
+#!/bin/bash
+iptables -F CLUSTER
+iptables -D INPUT -j CLUSTER
+iptables -X CLUSTER
+iptables -N CLUSTER
+
+
+{% raw %}
+# Allow all connection within the cluster
+{{range nodes}}
+iptables -A CLUSTER -s {{.Address}} -j ACCEPT{{end}}
+{% endraw %}
+iptables -A INPUT -j CLUSTER
+
+iptables -F COMMON
+iptables -D INPUT -j COMMON
+iptables -X COMMON
+iptables -N COMMON
+
+# Allow from docker0
+iptables -A COMMON -i docker0 -j ACCEPT
+
+# Allow stateful connections
+iptables -A COMMON -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+
+# Allow SSH from all IPs
+iptables -A COMMON -p tcp --dport 22 -j ACCEPT
+
+# Allow loopback
+iptables -I COMMON 1 -i lo -j ACCEPT
+
+# IP address whitelist
+{% for allow_ip in iptables_allow_ips %}
+iptables -A COMMON -s {{ allow_ip }} -j ACCEPT
+{% endfor %}
+
+# Allow traffic from the bootstrap node
+iptables -A COMMON -s 178.62.179.117 -j ACCEPT
+iptables -A COMMON -s 10.129.115.134 -j ACCEPT
+
+# Deny all others (just log for now)
+iptables -A COMMON -j LOG
+iptables -A COMMON -j DROP
+
+iptables -A INPUT -j COMMON
+
+# Forwarding rules
+iptables -F CLUSTER_FORWARD
+iptables -D FORWARD -j CLUSTER_FORWARD
+iptables -X CLUSTER_FORWARD
+iptables -N CLUSTER_FORWARD
+
+# Allow all connection within the cluster
+{% raw %}
+{{range nodes}}
+iptables -A CLUSTER_FORWARD -s {{.Address}} -j ACCEPT{{end}}
+{% endraw %}
+
+# Allow stateful connections
+iptables -A CLUSTER_FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+
+# IP address whitelist
+{% for allow_ip in iptables_allow_ips %}
+iptables -A CLUSTER_FORWARD -s {{ allow_ip }} -j ACCEPT
+{% endfor %}
+
+iptables -A CLUSTER_FORWARD -j LOG
+iptables -A CLUSTER_FORWARD -j DROP
+
+iptables -I FORWARD -j CLUSTER_FORWARD
