@@ -45,10 +45,6 @@ iptables -I COMMON 1 -i lo -j ACCEPT
 iptables -A COMMON -s {{ allow_ip }} -j ACCEPT
 {% endfor %}
 
-# Allow traffic from the bootstrap node
-iptables -A COMMON -s 178.62.179.117 -j ACCEPT
-iptables -A COMMON -s 10.129.115.134 -j ACCEPT
-
 # Deny all others (just log for now)
 iptables -A COMMON -j LOG
 iptables -A COMMON -j DROP
