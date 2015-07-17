@@ -71,10 +71,7 @@ iptables -A CLUSTER_FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 iptables -A CLUSTER_FORWARD -s {{ allow_ip }} -j ACCEPT
 {% endfor %}
 
-iptables -I FORWARD -j CLUSTER_FORWARD
+iptables -A CLUSTER_FORWARD -j LOG
+iptables -A CLUSTER_FORWARD -j DROP
 
-# Finally, after the DOCKER chain, drop the rest
-iptables -D FORWARD -j LOG
-iptables -A FORWARD -j LOG
-iptables -D FORWARD -j DROP
-iptables -A FORWARD -j DROP
+iptables -I FORWARD -j CLUSTER_FORWARD
