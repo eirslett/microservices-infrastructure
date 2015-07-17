@@ -26,6 +26,17 @@ iptables -A COMMON -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 # Allow SSH from all IPs
 iptables -A COMMON -p tcp --dport 22 -j ACCEPT
 
+# Allow Consul access (to let new hosts join) but rate limit the connections
+iptables -A COMMON -p tcp --dport 8300 -m state --state NEW -m recent --set
+iptables -A COMMON -p tcp --dport 8300 -m state --state NEW -m recent --update --seconds 10 --hitcount 32 -j DROP
+iptables -A COMMON -p udp --dport 8301 -m state --state NEW -m recent --set
+iptables -A COMMON -p udp --dport 8301 -m state --state NEW -m recent --update --seconds 10 --hitcount 32 -j DROP
+iptables -A COMMON -p udp --dport 8302 -m state --state NEW -m recent --set
+iptables -A COMMON -p udp --dport 8302 -m state --state NEW -m recent --update --seconds 10 --hitcount 32 -j DROP
+iptables -A COMMON -p tcp --dport 8400 -m state --state NEW -m recent --set
+iptables -A COMMON -p tcp --dport 8400 -m state --state NEW -m recent --update --seconds 10 --hitcount 32 -j DROP
+
+
 # Allow loopback
 iptables -I COMMON 1 -i lo -j ACCEPT
 
