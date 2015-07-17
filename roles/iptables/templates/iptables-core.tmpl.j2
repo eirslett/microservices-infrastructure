@@ -28,13 +28,13 @@ iptables -A COMMON -p tcp --dport 22 -j ACCEPT
 
 # Allow Consul access (to let new hosts join) but rate limit the connections
 iptables -A COMMON -p tcp --dport 8300 -m state --state NEW -m recent --set
-iptables -A COMMON -p tcp --dport 8300 -m state --state NEW -m recent --update --seconds 10 --hitcount 32 -j DROP
+iptables -A COMMON -p tcp --dport 8300 -m state --state NEW -m recent --update --seconds 10 --hitcount 20 -j DROP
 iptables -A COMMON -p udp --dport 8301 -m state --state NEW -m recent --set
-iptables -A COMMON -p udp --dport 8301 -m state --state NEW -m recent --update --seconds 10 --hitcount 32 -j DROP
+iptables -A COMMON -p udp --dport 8301 -m state --state NEW -m recent --update --seconds 10 --hitcount 20 -j DROP
 iptables -A COMMON -p udp --dport 8302 -m state --state NEW -m recent --set
-iptables -A COMMON -p udp --dport 8302 -m state --state NEW -m recent --update --seconds 10 --hitcount 32 -j DROP
+iptables -A COMMON -p udp --dport 8302 -m state --state NEW -m recent --update --seconds 10 --hitcount 20 -j DROP
 iptables -A COMMON -p tcp --dport 8400 -m state --state NEW -m recent --set
-iptables -A COMMON -p tcp --dport 8400 -m state --state NEW -m recent --update --seconds 10 --hitcount 32 -j DROP
+iptables -A COMMON -p tcp --dport 8400 -m state --state NEW -m recent --update --seconds 10 --hitcount 20 -j DROP
 
 
 # Allow loopback
@@ -75,7 +75,10 @@ iptables -A CLUSTER_FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 iptables -A CLUSTER_FORWARD -s {{ allow_ip }} -j ACCEPT
 {% endfor %}
 
-iptables -A CLUSTER_FORWARD -j LOG
-iptables -A CLUSTER_FORWARD -j DROP
-
 iptables -I FORWARD -j CLUSTER_FORWARD
+
+# Finally, after the DOCKER chain, drop the rest
+iptables -D FORWARD -j LOG
+iptables -A FORWARD -j LOG
+iptables -D FORWARD -j DROP
+iptables -A FORWARD -j DROP
