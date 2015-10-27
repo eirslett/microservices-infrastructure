@@ -9,6 +9,7 @@ variable short_name { default = "mi" }
 variable ssh_key { }
 variable worker_count { default = 3 }
 variable worker_size { default = 4096 }
+variable frontend_edge_count { default = 0 }
 
 # create resources
 resource "softlayer_virtualserver" "control" {
@@ -35,10 +36,26 @@ resource "softlayer_virtualserver" "worker" {
   user_data = "{\"role\":\"worker\",\"dc\":\"${var.datacenter}\"}"
 }
 
+resource "softlayer_virtualserver" "frontend-edge" {
+  count = "${var.frontend_edge_count}"
+  name = "${var.short_name}-frontend-edge-${format("%02d", count.index+1)}"
+  domain = "${var.domain}"
+  image = "${var.image_name}"
+  region = "${var.region_name}"
+  ram = "${var.worker_size}"
+  cpu = 1
+  ssh_keys = ["${var.ssh_key}"]
+  user_data = "{\"role\":\"frontend_edge\",\"dc\":\"${var.datacenter}\"}"
+}
+
 output "control_ips" {
   value = "${join(\",\", softlayer_virtualserver.control.*.ipv4_address)}"
 }
 
 output "worker_ips" {
   value = "${join(\",\", softlayer_virtualserver.worker.*.ipv4_address)}"
+}
+
+output "frontend_edge_ips" {
+  value = "${join(\",\", softlayer_virtualserver.frontend-edge.*.ipv4_address)}"
 }

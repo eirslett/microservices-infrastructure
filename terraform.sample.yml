@@ -68,6 +68,23 @@
     - mesos
     - haproxy
 
+# The frontend_edge role is a special version of a worker, which offers port
+# 80 and 443 to edge/dmz servers. Firewall settings should be different from the worker
+# nodes, so that these ports are exposed to the world.
+- hosts: role=frontend_edge
+  gather_facts: no
+  vars:
+    consul_dns_domain: consul
+    mesos_mode: follower
+    # It's possible to define a separate Mesos role for the edge servers, so that
+    # only some Mesos frameworks are explicitly allowed to schedule jobs on these nodes.
+    mesos_edge_role: "*"
+    haproxy_domain: mi-lb.example.com
+    mesos_resources: "ports({{mesos_edge_role}}):[80-80, 443-443]"
+  roles:
+    - calico
+    - mesos
+
 # the control nodes are necessarily more complex than the worker nodes, and have
 # ZooKeeper, Mesos, and Marathon leaders. In addition, they control Vault to
 # manage secrets in the cluster. These servers do not run applications by

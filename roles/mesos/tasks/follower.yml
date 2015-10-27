@@ -89,7 +89,7 @@
   sudo: yes
   copy:
     dest: /etc/mesos-slave/attributes
-    content: "node_id:{{ inventory_hostname }}"
+    content: "node_id:{{ inventory_hostname }};server_type:{{ role }}"
   notify: remove mesos follower metadata
   tags:
     - mesos

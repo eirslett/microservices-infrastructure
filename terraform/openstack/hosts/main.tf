@@ -8,6 +8,7 @@ variable keypair_name { }
 variable long_name { default = "microservices-infrastructure" }
 variable net_id { }
 variable resource_count {}
+variable frontend_edge_count { default = 0 }
 variable resource_flavor_name { }
 variable security_groups { default = "default" }
 variable short_name { default = "mi" }
@@ -65,10 +66,29 @@ resource "openstack_compute_instance_v2" "resource" {
   count = "${ var.resource_count }"
 }
 
+resource "openstack_compute_instance_v2" "frontend-edge" {
+  name = "${ var.short_name}-frontend-edge-${format("%02d", count.index+1) }"
+  key_pair = "${ var.keypair_name }"
+  image_name = "${ var.image_name }"
+  flavor_name = "${ var.resource_flavor_name }"
+  security_groups = [ "${ var.security_groups }" ]
+  network = { uuid = "${ var.net_id }" }
+  metadata = {
+    dc = "${var.datacenter}"
+    role = "frontend-edge"
+    ssh_user = "${ var.ssh_user }"
+  }
+  count = "${ var.frontend_edge_count }"
+}
+
 output "control_ips" {
   value = "${join(\",\", openstack_compute_instance_v2.control.*.access_ip_v4)}"
 }
 
 output "worker_ips" {
   value = "${join(\",\", openstack_compute_instance_v2.resource.*.access_ip_v4)}"
+}
+
+output "frontend_edge_ips" {
+  value = "${join(\",\", openstack_compute_instance_v2.frontend-edge.*.access_ip_v4)}"
 }
